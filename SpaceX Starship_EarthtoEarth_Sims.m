@@ -13,7 +13,7 @@ L = 55.74;                       % Distance from Base of Rocket to Center of Mas
 c_p = 55.09;                     % Location of Center of Pressure (m)
 CD = 0.6;                        % Coefficient of Drag
 A = 63.61;                       % Frontal Nose Area for Drag (m^2)
-D_const = (0.5) * CD * rho * A;  % Drag Coefficient 
+D_const = (0.5) * CD * rho * A;  % Drag Constant 
 
 %% Inertia Dyadics (Tensors)
 % Cone Dimension and Mass Properties 
@@ -39,12 +39,12 @@ Iyy_Cy = (1/12) * m_cylinder * (h_cylidner^2 + 3 * r_cylinder^2) + m_cylinder * 
 Izz_Cy = (1/2) * m_cylinder * r_cylinder^2;
 
 % Moments of Inertia Matrix
-Icone = [Ixx_Co      0         0
-         0         Iyy_Co      0
+Icone = [Ixx_Co      0         0;
+         0         Iyy_Co      0;
          0           0       Izz_Co];
 
-Icylinder = [Ixx_Cy      0         0
-             0         Iyy_Cy      0
+Icylinder = [Ixx_Cy      0         0;
+             0         Iyy_Cy      0;
              0           0       Izz_Cy];
 
 % Inertia Dyadic of Rocket 
@@ -57,7 +57,25 @@ Izz = I(3,3);
 
 
 
-%% Drag Froce 
+%% Force Control
+
+% Thrust Force 
+
+F_t = 10; % Thrust Magnitude 
 
 
 %% Equations of Motion
+
+% Mass Matrix 
+M = [m_r*cos(phi)*cos(theta)   m_r*sin(phi)*cos(theta)   m_rr*sin(theta)  0                  m_r*L;
+     0                         m_r*cos(phi)              0               -m_r*L*sin(theta)   0;
+     m_r*sin(phi)*sin(theta)   0                         m_r*cos(theta)  0                   0;
+     0                         0                         0               Ixx*sin(theta)      0;
+     0                         0                         0               0                   Iyy];
+
+% Force Matrix  
+F = [-m_r*g*sin(theta) - F_t*sin(lambda)*cos(delta) - D_mag*v1 - m_r*L*psidot^2*sin(theta)*cos(theta);
+                                   - F_t*sin(lambda)*sin(delta) - D_mag*v2;
+     -m_r*g*cos(theta) + F_t*cos(lambda) - D_mag*v3 + m_r*L*thetadot^2 + m_r*L*psidot^2*(sin(theta))^2;
+            -L*F_t*sin(lambda)*sin(delta) - (L-c_p)*D_mag*v2 - Izz*thetadot*psidot*cos(theta);
+        L*F_t*sin(lambda)*cos(delta) + (L-c_p)*D_mag*v1 -(Ixx-Izz)*psidot^2*sin(theta)*cos(theta)];
