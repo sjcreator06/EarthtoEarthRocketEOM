@@ -67,7 +67,7 @@ F_t = 10; % Thrust Magnitude
 %% Equations of Motion
 
 % Mass Matrix 
-M = [m_r*cos(phi)*cos(theta)   m_r*sin(phi)*cos(theta)   m_rr*sin(theta)  0                  m_r*L;
+M = [m_r*cos(phi)*cos(theta)   m_r*sin(phi)*cos(theta)   m_r*sin(theta)   0                  m_r*L;
      0                         m_r*cos(phi)              0               -m_r*L*sin(theta)   0;
      m_r*sin(phi)*sin(theta)   0                         m_r*cos(theta)  0                   0;
      0                         0                         0               Ixx*sin(theta)      0;
