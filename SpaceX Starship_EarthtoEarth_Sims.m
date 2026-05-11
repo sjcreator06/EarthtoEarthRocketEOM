@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                  AE 140
 %      Aerospace Rigid Body Dynamics
-% SpaceX Starship Earth to Earth Simultaion
+% SpaceX Starship Earth to Earth Simulation
 %   Samuel Thomas Joseph, Joseph Joseph
 %              May 11, 2026
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,9 +12,6 @@ g = 9.81;                        % Gravitational Constant (m/s^2)
 r_earth = 6371000;               % Radius of Earth (m)
 L = 55.74;                       % Distance from Base of Rocket to Center of Mass (m)
 c_p = 55.09;                     % Location of Center of Pressure (m)
-CD = 0.6;                        % Coefficient of Drag
-A = 63.61;                       % Frontal Nose Area for Drag (m^2)
-D_const = (0.5) * CD * rho * A;  % Drag Constant 
 
 %% Inertia Dyadics (Tensors)
 % Cone Dimension and Mass Properties 
@@ -54,70 +51,10 @@ Ixx = I(1,1);
 Iyy = I(2,2);
 Izz = I(3,3);
 
-%% Atmospheric Model for Density 
-
-% Altitude in terms of Cartesian Coordinates
-h = (x^2 + y^2 + z^2)^0.5 - r_earth;
-
-function [rho] = atmosphere(h)
-% Standard Sea Level Values
-rhoSL = 1.225;       % kg/m^3
-pSL   = 101325;      % Pa
-tSL   = 288.15;      % K
-R     = 287.058;     % J/(kg*K)
-gamma = 1.4;         
-
-% Variables
-% theta = Temperature Ratio
-% sigma = Pressure Ratio
-% T = Temperature
-% p = Pressure
-% rho = Density
-% a = Speed of Sound
-
-if h > 0 && h <= 36089 
-   theta = (1-6.875*10^(-6)*h);
-   T = theta*tSL;
-   sigma = (1-6.875*10^(-6)*h)^5.2561;
-   p = sigma*pSL;
-   rho = p/(R*T);
-
-elseif h > 36089 && h <= 65617 
-   theta = 0.75189;
-   T = theta*tSL;
-   sigma = 0.2234*exp((4.806*10^(-5)*(36089-h)));
-   p = sigma*pSL;
-   rho = p/(R*T);
- 
-elseif h > 65617 && h <= 104990 
-   theta = 0.75189+1.0577*10^(-6)*(h-65617);
-   T = theta*tSL;
-   sigma = 3.174716*10^(-6)*(0.75189+(1.0577*10^-6)*(h-65617))^-34.164;
-   p = sigma*pSL;
-   rho = p/(R*T);
-end
-end
-
-%% Force Control
-% Thrust Force 
+%% Thrust Force 
 F_t = 74400000;     % Constant Thrust Magnitude (Approximate Value)
 
-% Drag Force Components 
-
-% Velocity Squared Components 
-vx = (xdot*cos(phi)*cos(theta) + ydot*sin(phi)*cos(theta) + zdot*sin(theta) + L*thetadot)^2;
-vy = (ydot*cos(phi)-psidot*L*sin(theta))^2;
-vz = (xdot*sin(phi)*sin(theta)+zdot*cos(theta))^2;
-
-% Unit Vector Components 
-v_mag = (vx^2 + vy^2 + vz^2)^0.5;
-
-v1 = vx / v_mag;
-v2 = vy / v_mag;
-v3 = vz / v_mag;
-
 %% Equations of Motion
-
 % Mass Matrix 
 M = [m_r*cos(phi)*cos(theta)   m_r*sin(phi)*cos(theta)   m_r*sin(theta)   0                  m_r*L;
      0                         m_r*cos(phi)              0               -m_r*L*sin(theta)   0;
@@ -134,3 +71,61 @@ F = [-m_r*g*sin(theta) - F_t*sin(lambda)*cos(delta) - D_mag*v1 - m_r*L*psidot^2*
 
 % Acceleration State Vector 2nd Order ODE
 qdotdot = inv(M) * F;
+
+
+qdotdot = M \ F;
+
+%% Plotting Rocket Trajectory Recieved from Simulink
+
+% Position Data
+position = out.position_out;
+x = position.Data(:,1);
+y = position.Data(:,2);
+z = position.Data(:,3);
+
+% Angle Data
+angle = out.angle_out;
+psi = angle.Data(:,1);
+theta = angle.Data(:,2);
+
+% Time Data
+t = position.Time;
+
+% Position Plots
+figure(1)
+tiledGraph1 = tiledlayout(1,3);
+
+nexttile
+plot(t,x, LineWidth=2.0)
+title("X Position vs Time ")
+xlabel("Time (s)")
+ylabel("X Position (m)")
+
+nexttile
+plot(t,y, LineWidth=2.0)
+title("Y Position vs Time ")
+xlabel("Time (s)")
+ylabel("Y Position (m)")
+
+nexttile
+plot(t,z, LineWidth=2.0)
+title("Z Position vs Time ")
+xlabel("Time (s)")
+ylabel("Z Position (m)")
+
+% Angle Plots
+% Position Plots
+figure(2)
+tiledGraph2 = tiledlayout(1,2);
+
+nexttile
+plot(t,psi, LineWidth=2.0)
+title("Psi  vs Time ")
+xlabel("Time (s)")
+ylabel("Psi (rad)")
+
+nexttile
+plot(t,theta, LineWidth=2.0)
+title("Theta vs Time ")
+xlabel("Time (s)")
+ylabel("Theta (rad)")
