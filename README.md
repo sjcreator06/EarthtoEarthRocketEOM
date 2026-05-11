@@ -12,4 +12,4 @@
 <img width="800" height="450" alt="No Thrust Control" src="https://github.com/user-attachments/assets/b368d4c9-8211-415a-9319-8322b05d6be3" />
 
 ## Thrust Vector Control
-https://github.com/user-attachments/assets/4b234269-0e12-41c2-9fd1-8f19e47dec38
+<img width="800" height="450" alt="Thrust Vector Control" src="https://github.com/user-attachments/assets/5910766b-1cda-4912-a124-0363a8b548d4" />
